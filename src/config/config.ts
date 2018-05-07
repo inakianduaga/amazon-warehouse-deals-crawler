@@ -24,12 +24,8 @@ const config = {
     }
   ],
   puppeteer: {
-    /**
-     * Docker fix for ERROR:zygote_host_impl_linux.cc(90)] Running as root without --no-sandbox is not supported.
-     * {@link https://crbug.com/638180}
-     */
-    args: ['--no-sandbox'],
-    devtools: process.env.DEBUG === 'true'
+    // devtools: process.env.DEBUG === 'true'
+    devtools: true
   },
   /**
    * Every how often we crawl all pages
