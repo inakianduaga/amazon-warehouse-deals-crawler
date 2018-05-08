@@ -1,5 +1,6 @@
 import puppeteer from 'puppeteer'
 import config from './config/config'
+import sendEmail from './email'
 
 let iterations = 0
 const intervalRef = setInterval(async () => {
@@ -76,10 +77,12 @@ const processProductDetail = (browser: puppeteer.Browser) => async (
       Condition: ${cheapestWarehouseDealItem.condition}`
 
     // Generate description
-    const screenshot = ''
+    await page.setViewport(config.crawler.screenshotViewport)
+    const screenshot = await page.screenshot()
 
     // Send email:
     // https://nodemailer.com/message/attachments/
+    sendEmail(config.email, title, cheapestWarehouseDealItem.price as number, description, screenshot)
 
     // Mark article as email sent so we don't resend it for this price again
   }

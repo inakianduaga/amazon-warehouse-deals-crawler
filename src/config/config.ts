@@ -32,7 +32,16 @@ const config = {
    */
   crawler: {
     interval: 60 * 1000,
-    navigationTimeout: 10 * 1000
+    navigationTimeout: 10 * 1000,
+    screenshotViewport: {
+      width: 1280,
+      height: 1024
+    }
+  },
+  email: {
+    targetEmail: process.env.EMAIL,
+    user: process.env.EMAIL_USER,
+    password: process.env.EMAIL_PASSWORD
   }
 }
 
