@@ -41,7 +41,6 @@ export const sendItem = async (item: Item, title: string, page: puppeteer.Page) 
       Price: ${item.price} - 
       Condition: ${item.condition}`
 
-  console.log(`Match product: ${description}. Sending email...`)
   await page.setViewport(config.crawler.screenshotViewport)
   const screenshot = await page.screenshot()
 

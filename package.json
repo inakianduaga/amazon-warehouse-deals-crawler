@@ -11,7 +11,8 @@
     "build": "tsc -p .",
     "dev": "tsc -w",
     "prebuild": "tslint -c ./tslint.json --project ./ ",
-    "prettier:fix": "prettier --write '*/**/*.{js,ts,tsx,json,md,scss,graphql,css}' '*.{js,ts,tsx,json,md,scss,graphql,css}'"
+    "prettier:fix":
+      "prettier --write '*/**/*.{js,ts,tsx,json,md,scss,graphql,css}' '*.{js,ts,tsx,json,md,scss,graphql,css}'"
   },
   "dependencies": {
     "@types/nodemailer": "^4.6.0",
