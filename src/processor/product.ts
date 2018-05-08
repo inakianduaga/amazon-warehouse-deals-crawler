@@ -13,7 +13,9 @@ type ItemNullable = { [k in keyof Item]: Item[k] | null }
 
 const isNotNull = (i: Item | ItemNullable): i is Item => i.link !== null && i.title !== null && i.price !== null
 
-const processProduct = (browser: puppeteer.Browser) => async (product: typeof config.productQueries[0]) => {
+const processProduct = (browser: puppeteer.Browser) => async (
+  product: typeof config.productQueries[0]
+): Promise<Item[]> => {
   const page = await browser.newPage()
   await page.goto(product.query)
 
@@ -21,7 +23,7 @@ const processProduct = (browser: puppeteer.Browser) => async (product: typeof co
     await page.evaluate(() => document.querySelectorAll('#atfResults .s-item-container'))
   )
 
-  items
+  return items
     .map(item => {
       const link = item.querySelector('.a-size-small.a-link-normal.a-text-normal')
       const title = item.querySelector('a.s-access-detail-page .s-access-title')
@@ -38,7 +40,6 @@ const processProduct = (browser: puppeteer.Browser) => async (product: typeof co
     })
     .filter(isNotNull)
     .filter(x => x.price !== product.price.below)
-    .forEach(({ link, title }) => processProductDetail(browser)(link, title, product))
 }
 
 export default processProduct

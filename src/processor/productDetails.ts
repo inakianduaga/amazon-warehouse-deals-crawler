@@ -17,7 +17,7 @@ const cheapestWarehouseDealItem = (
   items: HTMLElement[],
   product: typeof config.productQueries[0],
   priceParser: ReturnType<typeof parseDisplayPrice>
-) =>
+): Item | undefined =>
   items
     .map(item => {
       const sellerName = item.querySelector('.a-spacing-none.olpSellerName img')
@@ -35,7 +35,7 @@ const cheapestWarehouseDealItem = (
     .filter(x => x.price < product.price.below)
     .sort((x, y) => x.price - y.price)[0]
 
-const processItem = async (item: Item, title: string, page: puppeteer.Page) => {
+export const sendItem = async (item: Item, title: string, page: puppeteer.Page) => {
   const description = `
       Product: ${title} - 
       Price: ${item.price} - 
@@ -45,23 +45,20 @@ const processItem = async (item: Item, title: string, page: puppeteer.Page) => {
   await page.setViewport(config.crawler.screenshotViewport)
   const screenshot = await page.screenshot()
 
-  return await sendEmail(config.email, title, item.price, description, screenshot)
+  await page.close()
+  return sendEmail(config.email, title, item.price, description, screenshot)
 }
 
-const processProductDetail = (browser: puppeteer.Browser) => async (
+export const processProductDetail = (browser: puppeteer.Browser) => async (
   url: string,
   title: string,
   product: typeof config.productQueries[0]
-) => {
+): Promise<{ item: Item | undefined; page: puppeteer.Page }> => {
   const page = await browser.newPage()
   await page.goto(url)
 
   const items: HTMLElement[] = Array.from(await page.evaluate(() => document.querySelectorAll('.olpOffer')))
   const item = cheapestWarehouseDealItem(items, product, parseDisplayPrice(url.indexOf('.co.uk') !== -1))
 
-  if (item) {
-    processItem(item, title, page)
-  }
+  return { item, page }
 }
-
-export default processProductDetail

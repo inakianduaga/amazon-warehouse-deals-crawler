@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import { SentMessageInfo } from 'nodemailer/lib/smtp-transport'
 import configType from './config/config'
 
 const send = (
@@ -7,7 +8,7 @@ const send = (
   price: number,
   description: string,
   screenshot: Buffer
-) => {
+): Promise<SentMessageInfo> => {
   const transporter = nodemailer.createTransport({})
 
   return transporter.sendMail({
