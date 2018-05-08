@@ -9,9 +9,9 @@ const config = {
     {
       label: 'amazon.de oleds',
       query:
-        'https://www.amazon.de/s/gp/search/ref=sr_nr_p_n_feature_three_br_2?fst=as%3Aoff&rh=n%3A3581963031%2Cn%3A562066%2Cn%3A%21569604%2Cn%3A761254%2Cn%3A1197292%2Cp_n_feature_three_browse-bin%3A497883011&bbn=3581963031&ie=UTF8&qid=1525726934&rnid=497879011',
+        'https://www.amazon.de/s/gp/search/ref=sr_nr_p_n_feature_three_br_2?fst=as%3Aoff&rh=n%3A3581963031%2Cn%3A562066%2Cn%3A%21569604%2Cn%3A761254%2Cn%3A1197292%2Ck%3Aoled%2Cp_n_feature_three_browse-bin%3A497883011&bbn=3581963031&keywords=oled&ie=UTF8&qid=1525821517&rnid=497879011',
       price: {
-        below: 1400
+        below: 2500
       }
     },
     {
@@ -46,9 +46,17 @@ const config = {
     }
   },
   email: {
-    targetEmail: process.env.EMAIL,
-    user: process.env.EMAIL_USER,
-    password: process.env.EMAIL_PASSWORD
+    from: process.env.EMAIL_FROM,
+    to: process.env.EMAIL_TO,
+    smtpConfig: {
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // upgrade later with STARTTLS
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+      }
+    }
   }
 }
 

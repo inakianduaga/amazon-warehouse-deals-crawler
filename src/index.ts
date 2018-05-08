@@ -54,8 +54,8 @@ timer(0, config.crawler.interval)
                 )
               )
           ),
-          tap(() => console.info('Finished crawling, terminating browser')),
-          finalize(() => browser.close())
+          tap(() => console.info('Finished crawling, terminating browser'))
+          // finalize(() => browser.close())
         )
     )
   )

@@ -11,25 +11,21 @@ type Item = {
 
 type ItemNullable = { [k in keyof Item]: Item[k] | null }
 
+type ItemNullableWithStringPrice = Pick<ItemNullable, 'seller' | 'condition'> & { price: string | null }
+
 const isNotNull = (i: Item | ItemNullable): i is Item => i.seller !== null && i.price !== null && i.condition !== null
 
 const cheapestWarehouseDealItem = (
-  items: HTMLElement[],
+  items: ItemNullableWithStringPrice[],
   product: typeof config.productQueries[0],
   priceParser: ReturnType<typeof parseDisplayPrice>
 ): Item | undefined =>
   items
-    .map(item => {
-      const sellerName = item.querySelector('.a-spacing-none.olpSellerName img')
-      const price = item.querySelector('.olpOfferPrice')
-      const condition = item.querySelector('.olpCondition')
-
-      return {
-        seller: sellerName && sellerName.getAttribute('alt'),
-        price: price && price.textContent ? priceParser(price.textContent) : null,
-        condition: condition && condition.textContent
-      }
-    })
+    .map(({ condition, seller, price }) => ({
+      seller,
+      condition,
+      price: price ? priceParser(price) : null
+    }))
     .filter(isNotNull)
     .filter(x => ['Warehouse Deals', 'Amazon Warehouse Deals', 'Amazon'].indexOf(x.seller) !== -1)
     .filter(x => x.price < product.price.below)
@@ -44,8 +40,9 @@ export const sendItem = async (item: Item, title: string, page: puppeteer.Page) 
   await page.setViewport(config.crawler.screenshotViewport)
   const screenshot = await page.screenshot()
 
+  await sendEmail(config.email, title, item.price, description, screenshot)
+
   await page.close()
-  return sendEmail(config.email, title, item.price, description, screenshot)
 }
 
 export const processProductDetail = (browser: puppeteer.Browser) => async (
@@ -56,8 +53,25 @@ export const processProductDetail = (browser: puppeteer.Browser) => async (
   const page = await browser.newPage()
   await page.goto(url)
 
-  const items: HTMLElement[] = Array.from(await page.evaluate(() => document.querySelectorAll('.olpOffer')))
-  const item = cheapestWarehouseDealItem(items, product, parseDisplayPrice(url.indexOf('.co.uk') !== -1))
+  // page.evaluate will execute code within browser, so interface is via serializable results only
+  const extractedItems: ItemNullableWithStringPrice[] = await page.evaluate(() => {
+    const items = Array.from(document.querySelectorAll('.olpOffer'))
 
-  return { item, page }
+    return items.map(item => {
+      const sellerName = item.querySelector('.a-spacing-none.olpSellerName img')
+      const price = item.querySelector('.olpOfferPrice')
+      const condition = item.querySelector('.olpCondition')
+
+      return {
+        seller: sellerName && sellerName.getAttribute('alt'),
+        price: price && price.textContent,
+        condition: condition && condition.textContent && condition.textContent.replace('\n', '')
+      }
+    })
+  })
+
+  return {
+    item: cheapestWarehouseDealItem(extractedItems, product, parseDisplayPrice(url.indexOf('.co.uk') !== -1)),
+    page
+  }
 }

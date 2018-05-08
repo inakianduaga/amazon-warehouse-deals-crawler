@@ -20,9 +20,7 @@ const processProduct = (browser: puppeteer.Browser) => async (
   const page = await browser.newPage()
   await page.goto(product.query)
 
-  /**
-   * page.evaluate will execute code within browser, so interface is via serializable results only
-   */
+  // page.evaluate will execute code within browser, so interface is via serializable results only
   const extractedItems: ItemNullableWithStringPrice[] = await page.evaluate(() => {
     const itemsAsNodes = document.querySelectorAll('#atfResults .s-item-container')
     const items: Element[] = Array.from(itemsAsNodes)
@@ -47,7 +45,7 @@ const processProduct = (browser: puppeteer.Browser) => async (
       price: price ? parseDisplayPrice(product.query.indexOf('.co.uk') !== -1)(price) : null
     }))
     .filter(isNotNull)
-    .filter(x => x.price !== product.price.below)
+    .filter(x => x.price < product.price.below)
 }
 
 export default processProduct

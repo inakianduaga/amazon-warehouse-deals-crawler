@@ -8,12 +8,10 @@ const send = (
   price: number,
   description: string,
   screenshot: Buffer
-): Promise<SentMessageInfo> => {
-  const transporter = nodemailer.createTransport({})
-
-  return transporter.sendMail({
-    from: config.user,
-    to: config.targetEmail,
+): Promise<SentMessageInfo> =>
+  nodemailer.createTransport(config.smtpConfig).sendMail({
+    from: config.from,
+    to: config.to,
     subject: `Warehouse Deal EUR ${price}: ${title.substr(0, 30)}...`,
     html: `<p>${description}</p>`,
     attachments: [
@@ -23,6 +21,5 @@ const send = (
       }
     ]
   })
-}
 
 export default send
