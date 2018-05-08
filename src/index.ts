@@ -1,19 +1,24 @@
 import puppeteer from 'puppeteer'
+import { from, interval, Observable, pipe } from 'rxjs'
+import { combineLatest, delay, map, mergeMap, take, tap, zip } from 'rxjs/Operators'
 import config from './config/config'
 import { parseDisplayPrice } from './money'
 import processProduct from './processor/product'
 
-let iterations = 0
-const intervalRef = setInterval(async () => {
-  console.info('Launching product search update...')
-  const browser = await puppeteer.launch(config.puppeteer)
-  config.productQueries.forEach(processProduct(browser))
-
-  // Bump counter
-  iterations = iterations + 1
-
-  // Stop loop after max iterations
-  if (iterations >= 1) {
-    clearInterval(intervalRef)
-  }
-}, config.crawler.interval)
+interval(config.crawler.interval)
+  .pipe(
+    mergeMap(() => puppeteer.launch(config.puppeteer)),
+    take(1),
+    tap(() => console.info('Preparing for crawling...')),
+    mergeMap(browser =>
+      from(config.productQueries).pipe(
+        delay(config.crawler.delayPerProduct),
+        map(product => ({
+          browser,
+          product
+        }))
+      )
+    )
+  )
+  .pipe(tap(data => console.log(`Processing query ${data.product.label}`)))
+  .forEach(data => processProduct(data.browser)(data.product))

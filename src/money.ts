@@ -1,4 +1,4 @@
-export const parseDisplayPrice = (price: string, isUk: boolean) => {
+export const parseDisplayPrice = (isUk: boolean) => (price: string) => {
   const currencySymbols = ['EUR', 'GBP', '£', '€']
   const currencyLessPrice = currencySymbols.reduce((p, currency) => p.replace(currency, ''), price)
   const localizedPrice = isUk

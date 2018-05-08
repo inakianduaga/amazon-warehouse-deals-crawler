@@ -3,6 +3,16 @@ import config from '../config/config'
 import { parseDisplayPrice } from '../money'
 import processProductDetail from './productDetails'
 
+type Item = {
+  link: string
+  title: string
+  price: number
+}
+
+type ItemNullable = { [k in keyof Item]: Item[k] | null }
+
+const isNotNull = (i: Item | ItemNullable): i is Item => i.link !== null && i.title !== null && i.price !== null
+
 const processProduct = (browser: puppeteer.Browser) => async (product: typeof config.productQueries[0]) => {
   const page = await browser.newPage()
   await page.goto(product.query)
@@ -22,13 +32,13 @@ const processProduct = (browser: puppeteer.Browser) => async (product: typeof co
         title: title && title.getAttribute('attribute'),
         price:
           price && price.textContent
-            ? parseDisplayPrice(price.textContent, product.query.indexOf('.co.uk') !== -1)
+            ? parseDisplayPrice(product.query.indexOf('.co.uk') !== -1)(price.textContent)
             : null
       }
     })
-    .filter(x => x.link !== null && x.title !== null && x.price !== null)
+    .filter(isNotNull)
     .filter(x => x.price !== product.price.below)
-    .forEach(x => processProductDetail(browser)(x.link as string, x.title as string, product))
+    .forEach(({ link, title }) => processProductDetail(browser)(link, title, product))
 }
 
 export default processProduct
