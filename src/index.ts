@@ -17,15 +17,18 @@ import {
 import config from './config/config'
 import log from './logging/log'
 import { parseDisplayPrice } from './money'
-import { flagAsSent, hasBeenSent } from './persistance/storage'
+import { flagAsSent, hasBeenSent, storageCount } from './persistance/storage'
 import { ISendItem, ISendItemWithSku, Item, processProductDetail, sendItems } from './processor/productDetails'
 import processQuery from './processor/query'
 
+log.banner('===========================================')
 log.banner('===== Amazon Warehouse Deals Crawler ======')
+log.banner('===========================================')
+log.info(`\nStats: All time deals found: ${storageCount()} \n`)
 
 timer(0, config.crawler.interval)
   .pipe(
-    tap(i => log.info(`\n Run ${i}: Instantiating new browser`)),
+    tap(i => log.info(`Run ${i}: Instantiating new browser`)),
     concatMap(() => puppeteer.launch(config.puppeteer)),
     take(1),
     mergeMap(browser =>

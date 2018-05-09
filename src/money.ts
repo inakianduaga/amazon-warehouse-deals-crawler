@@ -1,3 +1,5 @@
+const poundToEuroConversion = 1.14
+
 export const parseDisplayPrice = (isUk: boolean) => (price: string) => {
   const currencySymbols = ['EUR', 'GBP', '£', '€']
   const currencyLessPrice = currencySymbols.reduce((p, currency) => p.replace(currency, ''), price)
@@ -8,10 +10,12 @@ export const parseDisplayPrice = (isUk: boolean) => (price: string) => {
         .replace('*', ',')
     : currencyLessPrice
 
-  return parseFloat(
+  const unlocalizedPrice = parseFloat(
     localizedPrice
       .replace('.', '')
       .split(',')[0]
       .trim()
   )
+
+  return isUk ? Math.round(unlocalizedPrice * poundToEuroConversion) : unlocalizedPrice
 }

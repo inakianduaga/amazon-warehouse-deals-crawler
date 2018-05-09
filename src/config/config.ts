@@ -59,7 +59,10 @@ const config = {
     }
   },
   persistance: {
-    path: './db.json'
+    /**
+     * Storage is relative to the project root folder
+     */
+    path: './.storage'
   }
 }
 

@@ -58,7 +58,7 @@ export const sendItems = async (items: ISendItem[]) => {
     (acc, item) => `${acc} 
     <h4><a href="${item.url}">${item.title}</a> €${item.price}</h4>
     Condition: ${item.condition}
-    <br/>
+    <br/><br/>
   `,
     ''
   )

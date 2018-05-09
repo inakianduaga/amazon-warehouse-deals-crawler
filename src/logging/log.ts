@@ -20,7 +20,7 @@ const indent = (s: string, n: identationLevels) => {
 const log = {
   banner: (s: string, i: identationLevels = '0') => console.log(chalk.white.bgYellowBright(indent(s, i))),
   success: (s: string, i: identationLevels = '0') => console.log(chalk.green(indent(s, i))),
-  info: (s: string, i: identationLevels = '0') => console.log(chalk.blue(indent(s, i))),
+  info: (s: string, i: identationLevels = '0') => console.log(indent(s, i)),
   warn: (s: string, i: identationLevels = '0') => console.log(chalk.keyword('orange')(indent(s, i))),
   error: (s: string, i: identationLevels = '0') => console.log(chalk.red(indent(s, i))),
   debug: (s: string, i: identationLevels = '0') => console.log(chalk.grey.dim(indent(s, i)))
