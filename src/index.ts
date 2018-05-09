@@ -17,6 +17,7 @@ import {
 import config from './config/config'
 import log from './logging/log'
 import { parseDisplayPrice } from './money'
+import { flagAsSent, hasBeenSent } from './persistance/storage'
 import processProduct from './processor/product'
 import { ISendItem, Item, processProductDetail, sendItems } from './processor/productDetails'
 

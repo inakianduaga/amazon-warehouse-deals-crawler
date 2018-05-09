@@ -57,6 +57,9 @@ const config = {
         pass: process.env.EMAIL_PASSWORD
       }
     }
+  },
+  persistance: {
+    path: './db.json'
   }
 }
 
