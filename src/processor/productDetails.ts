@@ -38,7 +38,7 @@ const cheapestWarehouseDealItem = (
     }))
     .filter(isNotNull)
     .filter(x => ['Warehouse Deals', 'Amazon Warehouse Deals', 'Amazon'].indexOf(x.seller) !== -1)
-    .filter(x => x.price < product.price.below)
+    .filter(x => x.price < product.price.below && x.price > product.price.above)
     .sort((x, y) => x.price - y.price)[0]
 
 export const sendItems = async (items: ISendItem[]) => {

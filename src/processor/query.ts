@@ -48,7 +48,7 @@ const processQuery = (browser: puppeteer.Browser) => async (
     }))
     .filter(isNotNull)
     .filter(x => x.sku.length > 0)
-    .filter(x => x.price < product.price.below)
+    .filter(x => x.price < product.price.below && x.price > product.price.above)
 }
 
 /**
