@@ -15,7 +15,7 @@ const send = (
     from: config.from,
     to: config.to,
     subject,
-    html: description,
+    html: `<p>${description}</p>`,
     attachments: attachments.map(({ name, content }) => ({
       filename: name,
       content

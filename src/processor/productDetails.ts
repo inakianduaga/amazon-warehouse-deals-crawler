@@ -52,16 +52,16 @@ export const sendItems = async (items: ISendItem[]) => {
 
   const description = items.reduce(
     (acc, item) => `${acc} 
-    <h4><a href="${item.url}">${item.title}</a>  €${item.price}</h4>
+    <h4><a href="${item.url}">${item.title}</a> €${item.price}</h4>
     Condition: ${item.condition}
-    <br/><br/>
+    <br/>
   `,
     ''
   )
 
   const subject = `Warehouse Deals Found`
 
-  await sendEmail(config.email, description, subject, attachments)
+  await sendEmail(config.email, subject, description, attachments)
 
   for (const item of items) {
     await item.page.close()
