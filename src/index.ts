@@ -9,23 +9,25 @@ import {
   finalize,
   map,
   mergeMap,
+  reduce,
   take,
   tap,
   zip
 } from 'rxjs/Operators'
 import config from './config/config'
+import log from './logging/log'
 import { parseDisplayPrice } from './money'
 import processProduct from './processor/product'
-import { processProductDetail, sendItem } from './processor/productDetails'
+import { ISendItem, Item, processProductDetail, sendItems } from './processor/productDetails'
 
-console.log('===== Amazon Warehouse Deals Crawler ======')
+log.banner('===== Amazon Warehouse Deals Crawler ======')
 
 timer(0, config.crawler.interval)
   .pipe(
-    tap(i => console.info(`Run ${i}: Instantiating new browser`)),
+    tap(i => log.info(`Run ${i}: Instantiating new browser`)),
     concatMap(() => puppeteer.launch(config.puppeteer)),
     take(1),
-    tap(() => console.info('Preparing for crawling...')),
+    tap(() => log.debug('Preparing for crawling...')),
     mergeMap(browser =>
       from(config.productQueries)
         // process chain of queries
@@ -35,7 +37,7 @@ timer(0, config.crawler.interval)
             browser,
             product
           })),
-          tap(data => console.log(`Processing query ${data.product.label}`)),
+          tap(data => log.info(`Processing query ${data.product.label}`)),
           mergeMap(data =>
             from(processProduct(data.browser)(data.product))
               // Process all summary products matching query
@@ -47,16 +49,31 @@ timer(0, config.crawler.interval)
                     //
                     .pipe(
                       //
-                      filter(d => d.item !== undefined),
-                      tap(() => console.log(`Sending email for item ${product.title}`)),
-                      map(d => sendItem(d.item as any, product.title, d.page))
+                      filter((d): d is { item: Item; page: puppeteer.Page } => d.item !== undefined),
+                      map(d => ({
+                        ...d.item,
+                        page: d.page,
+                        url: product.link,
+                        title: product.title
+                      }))
                     )
                 )
               )
           ),
-          tap(() => console.info('Finished crawling, terminating browser'))
-          // finalize(() => browser.close())
+          // consolidate all products into array
+          reduce<ISendItem, ISendItem[]>((acc, value) => {
+            acc.push(value)
+            return acc
+          }, []),
+          tap(items => log.success(`Grouping matches and firing email w/ ${items.length} product(s)`)),
+          mergeMap(items => from(sendItems(items.sort((a, b) => a.price - b.price)))),
+          tap(() => log.debug('Finished crawling, terminating browser')),
+          finalize(() => browser.close())
         )
-    )
+    ),
+    catchError((e, source) => {
+      log.error(`An error has ocurred: ${e}`)
+      return source
+    })
   )
   .subscribe(() => null)

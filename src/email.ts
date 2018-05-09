@@ -4,22 +4,22 @@ import configType from './config/config'
 
 const send = (
   config: typeof configType.email,
-  title: string,
-  price: number,
+  subject: string,
   description: string,
-  screenshot: Buffer
+  attachments: Array<{
+    content: Buffer
+    name: string
+  }> = []
 ): Promise<SentMessageInfo> =>
   nodemailer.createTransport(config.smtpConfig).sendMail({
     from: config.from,
     to: config.to,
-    subject: `Warehouse Deal EUR ${price}: ${title.substr(0, 30)}...`,
-    html: `<p>${description}</p>`,
-    attachments: [
-      {
-        filename: 'details.png',
-        content: screenshot
-      }
-    ]
+    subject,
+    html: description,
+    attachments: attachments.map(({ name, content }) => ({
+      filename: name,
+      content
+    }))
   })
 
 export default send

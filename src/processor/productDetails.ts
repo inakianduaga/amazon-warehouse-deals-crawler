@@ -3,10 +3,16 @@ import config from '../config/config'
 import sendEmail from '../email'
 import { parseDisplayPrice } from '../money'
 
-type Item = {
+export interface Item {
   seller: string
   price: number
   condition: string
+}
+
+export interface ISendItem extends Item {
+  url: string
+  page: puppeteer.Page
+  title: string
 }
 
 type ItemNullable = { [k in keyof Item]: Item[k] | null }
@@ -31,18 +37,35 @@ const cheapestWarehouseDealItem = (
     .filter(x => x.price < product.price.below)
     .sort((x, y) => x.price - y.price)[0]
 
-export const sendItem = async (item: Item, title: string, page: puppeteer.Page) => {
-  const description = `
-      Product: ${title} - 
-      Price: ${item.price} - 
-      Condition: ${item.condition}`
+export const sendItems = async (items: ISendItem[]) => {
+  const attachments = []
 
-  await page.setViewport(config.crawler.screenshotViewport)
-  const screenshot = await page.screenshot()
+  for (const item of items) {
+    await item.page.setViewport(config.crawler.screenshotViewport)
+    const screenshot = await item.page.screenshot()
 
-  await sendEmail(config.email, title, item.price, description, screenshot)
+    attachments.push({
+      content: screenshot,
+      name: `${item.title.replace(' ', '-').toLocaleLowerCase()}.png`
+    })
+  }
 
-  await page.close()
+  const description = items.reduce(
+    (acc, item) => `${acc} 
+    <h4><a href="${item.url}">${item.title}</a>  €${item.price}</h4>
+    Condition: ${item.condition}
+    <br/><br/>
+  `,
+    ''
+  )
+
+  const subject = `Warehouse Deals Found`
+
+  await sendEmail(config.email, description, subject, attachments)
+
+  for (const item of items) {
+    await item.page.close()
+  }
 }
 
 export const processProductDetail = (browser: puppeteer.Browser) => async (
