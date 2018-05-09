@@ -34,7 +34,7 @@ const config = {
     /**
      * How much to wait between each product search
      */
-    delayPerProduct: 4000,
+    delayPerQuery: 4000,
     /**
      * Cron time gap
      */

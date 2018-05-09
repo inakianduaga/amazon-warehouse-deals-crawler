@@ -15,6 +15,10 @@ export interface ISendItem extends Item {
   title: string
 }
 
+export interface ISendItemWithSku extends ISendItem {
+  sku: string
+}
+
 type ItemNullable = { [k in keyof Item]: Item[k] | null }
 
 type ItemNullableWithStringPrice = Pick<ItemNullable, 'seller' | 'condition'> & { price: string | null }

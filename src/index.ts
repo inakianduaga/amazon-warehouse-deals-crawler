@@ -18,8 +18,8 @@ import config from './config/config'
 import log from './logging/log'
 import { parseDisplayPrice } from './money'
 import { flagAsSent, hasBeenSent } from './persistance/storage'
-import processProduct from './processor/product'
-import { ISendItem, Item, processProductDetail, sendItems } from './processor/productDetails'
+import { ISendItem, ISendItemWithSku, Item, processProductDetail, sendItems } from './processor/productDetails'
+import processQuery from './processor/query'
 
 log.banner('===== Amazon Warehouse Deals Crawler ======')
 
@@ -32,20 +32,21 @@ timer(0, config.crawler.interval)
       from(config.productQueries)
         // process chain of queries
         .pipe(
-          delay(config.crawler.delayPerProduct),
-          map(product => ({
+          // delay(config.crawler.delayPerQuery),
+          map(query => ({
             browser,
-            product
+            query
           })),
-          tap(data => log.info(`Processing query: "${data.product.label}"`, '1')),
+          tap(data => log.info(`Processing query: "${data.query.label}"`, '1')),
           mergeMap(data =>
-            from(processProduct(data.browser)(data.product))
+            from(processQuery(data.browser)(data.query))
               // Process all summary products matching query
               .pipe(
-                tap(products => log.debug(`"${data.product.label}": identified ${products.length} product(s)`, '2')),
+                map(products => products.filter(p => !hasBeenSent(p.sku))), // skip already sent
+                tap(products => log.debug(`"${data.query.label}": identified ${products.length} new product(s)`, '2')),
                 mergeMap(products => from(products)),
                 mergeMap(product =>
-                  from(processProductDetail(data.browser)(product.link, product.title, data.product))
+                  from(processProductDetail(data.browser)(product.link, product.title, data.query))
                     //
                     .pipe(
                       //
@@ -54,19 +55,21 @@ timer(0, config.crawler.interval)
                         ...d.item,
                         page: d.page,
                         url: product.link,
-                        title: product.title
+                        title: product.title,
+                        sku: product.sku
                       }))
                     )
                 )
               )
           ),
           // consolidate all products into array
-          reduce<ISendItem, ISendItem[]>((acc, value) => {
+          reduce<ISendItemWithSku, ISendItemWithSku[]>((acc, value) => {
             acc.push(value)
             return acc
           }, []),
           tap(items => log.success(`Grouping matches and firing email w/ ${items.length} product(s)`, '1')),
-          mergeMap(items => from(sendItems(items.sort((a, b) => a.price - b.price)))),
+          map(x => x.sort((a, b) => a.price - b.price)), // sort price asc
+          mergeMap(items => from(sendItems(items)).pipe(tap(() => items.forEach(item => flagAsSent(item.sku))))),
           tap(() => log.debug('Finished crawling, terminating browser', '1')),
           finalize(() => browser.close())
         )

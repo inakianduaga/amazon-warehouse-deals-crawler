@@ -6,6 +6,7 @@ type Item = {
   link: string
   title: string
   price: number
+  sku: string
 }
 
 type ItemNullable = { [k in keyof Item]: Item[k] | null }
@@ -14,7 +15,7 @@ type ItemNullableWithStringPrice = Pick<ItemNullable, 'link' | 'title'> & { pric
 
 const isNotNull = (i: Item | ItemNullable): i is Item => i.link !== null && i.title !== null && i.price !== null
 
-const processProduct = (browser: puppeteer.Browser) => async (
+const processQuery = (browser: puppeteer.Browser) => async (
   product: typeof config.productQueries[0]
 ): Promise<Item[]> => {
   const page = await browser.newPage()
@@ -42,10 +43,23 @@ const processProduct = (browser: puppeteer.Browser) => async (
     .map(({ price, title, link }) => ({
       title,
       link,
-      price: price ? parseDisplayPrice(product.query.indexOf('.co.uk') !== -1)(price) : null
+      price: price ? parseDisplayPrice(product.query.indexOf('.co.uk') !== -1)(price) : null,
+      sku: link ? extractProductSkuFromUrl(link) : ''
     }))
     .filter(isNotNull)
+    .filter(x => x.sku.length > 0)
     .filter(x => x.price < product.price.below)
 }
 
-export default processProduct
+/**
+ * Extracts SKUs from urls of the form:
+ * https://www.amazon.de/LG-OLED65B7D-Fernseher-Doppelter-Triple/dp/B06Y5VXG7S/ref...
+ *
+ */
+const extractProductSkuFromUrl = (url: string): string => {
+  const skuRegex = /^.*dp\/(.*)\/.*/
+  const match = url.match(skuRegex)
+  return match ? match[1] : ''
+}
+
+export default processQuery
