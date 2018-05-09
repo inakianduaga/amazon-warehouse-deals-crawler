@@ -54,10 +54,10 @@ const processQuery = (browser: puppeteer.Browser) => async (
 /**
  * Extracts SKUs from urls of the form:
  * https://www.amazon.de/LG-OLED65B7D-Fernseher-Doppelter-Triple/dp/B06Y5VXG7S/ref...
- *
+ * https://www.amazon.de/gp/offer-listing/B06Y5VXG7S/ref=...
  */
 const extractProductSkuFromUrl = (url: string): string => {
-  const skuRegex = /^.*dp\/(.*)\/.*/
+  const skuRegex = /^.*[dp|offer\-listing]\/(.*)\/.*/
   const match = url.match(skuRegex)
   return match ? match[1] : ''
 }

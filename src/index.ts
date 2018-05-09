@@ -27,7 +27,7 @@ timer(0, config.crawler.interval)
   .pipe(
     tap(i => log.info(`\n Run ${i}: Instantiating new browser`)),
     concatMap(() => puppeteer.launch(config.puppeteer)),
-    take(2),
+    take(1),
     mergeMap(browser =>
       from(config.productQueries)
         // process chain of queries
@@ -66,17 +66,22 @@ timer(0, config.crawler.interval)
           reduce<ISendItemWithSku, ISendItemWithSku[]>((acc, value) => {
             acc.push(value)
             return acc
-          }, []),
+          }, [])
+        )
+        .pipe(filter(x => x.length > 0)) // filter out empty results
+        .pipe(
           tap(items => log.success(`Grouping matches and firing email w/ ${items.length} product(s)`, '1')),
-          map(x => x.sort((a, b) => a.price - b.price)), // sort price asc
+          map(items => items.sort((a, b) => a.price - b.price)), // sort price asc
           mergeMap(items => from(sendItems(items)).pipe(tap(() => items.forEach(item => flagAsSent(item.sku))))),
-          tap(() => log.debug('Finished crawling, terminating browser', '1')),
-          finalize(() => browser.close())
+          finalize(() => {
+            log.debug('Finished crawling, terminating browser', '1')
+            return browser.close()
+          })
         )
     ),
     catchError((e, source) => {
       log.error(`An error has ocurred: ${e}`, '1')
-      return source
+      return source.pipe(delay(config.crawler.interval))
     })
   )
   .forEach(() => null)
