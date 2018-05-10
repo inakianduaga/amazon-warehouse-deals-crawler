@@ -1,3 +1,4 @@
+import { Price } from '../config/queries'
 const poundToEuroConversion = 1.14
 
 export const parseDisplayPrice = (isUk: boolean) => (price: string) => {
@@ -19,3 +20,6 @@ export const parseDisplayPrice = (isUk: boolean) => (price: string) => {
 
   return isUk ? Math.round(unlocalizedPrice * poundToEuroConversion) : unlocalizedPrice
 }
+
+export const isInRange = (price: number, config: Price) =>
+  price < config.below && (config.above === undefined || price > config.above)

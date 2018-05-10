@@ -1,24 +1,10 @@
 import puppeteer from 'puppeteer'
-import { from, Observable, pipe, timer } from 'rxjs'
-import {
-  catchError,
-  combineLatest,
-  concatMap,
-  delay,
-  filter,
-  finalize,
-  map,
-  mergeMap,
-  reduce,
-  take,
-  tap,
-  zip
-} from 'rxjs/Operators'
+import { from, timer } from 'rxjs'
+import { catchError, concatMap, delay, filter, finalize, map, mergeMap, reduce, take, tap } from 'rxjs/Operators'
 import config from './config/config'
 import log from './logging/log'
-import { parseDisplayPrice } from './money'
 import { flagAsSent, hasBeenSent, storageCount } from './persistance/storage'
-import { ISendItem, ISendItemWithSku, Item, processProductDetail, sendItems } from './processor/productDetails'
+import { ISendItemWithSku, Item, processProductDetail, sendItems } from './processor/productDetails'
 import processQuery from './processor/query'
 
 log.banner('===========================================')
@@ -49,7 +35,7 @@ timer(0, config.crawler.interval)
                 tap(products => log.debug(`"${data.query.label}": identified ${products.length} new product(s)`, '2')),
                 mergeMap(products => from(products)),
                 mergeMap(product =>
-                  from(processProductDetail(data.browser)(product.link, product.title, data.query))
+                  from(processProductDetail(data.browser)(product.link, data.query))
                     //
                     .pipe(
                       //

@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer'
 import config from '../config/config'
 import sendEmail from '../email'
-import { parseDisplayPrice } from '../money'
+import { isInRange as isPriceInRange, parseDisplayPrice } from '../pricing/price'
 
 export interface Item {
   seller: string
@@ -38,7 +38,7 @@ const cheapestWarehouseDealItem = (
     }))
     .filter(isNotNull)
     .filter(x => ['Warehouse Deals', 'Amazon Warehouse Deals', 'Amazon'].indexOf(x.seller) !== -1)
-    .filter(x => x.price < product.price.below && x.price > product.price.above)
+    .filter(x => isPriceInRange(x.price, product.price))
     .sort((x, y) => x.price - y.price)[0]
 
 export const sendItems = async (items: ISendItem[]) => {
@@ -74,7 +74,6 @@ export const sendItems = async (items: ISendItem[]) => {
 
 export const processProductDetail = (browser: puppeteer.Browser) => async (
   url: string,
-  title: string,
   product: typeof config.productQueries[0]
 ): Promise<{ item: Item | undefined; page: puppeteer.Page }> => {
   const page = await browser.newPage()

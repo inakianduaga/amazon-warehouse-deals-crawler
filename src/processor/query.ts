@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer'
 import config from '../config/config'
-import { parseDisplayPrice } from '../money'
+import { isInRange as isPriceInRange, parseDisplayPrice } from '../pricing/price'
 
 type Item = {
   link: string
@@ -14,6 +14,9 @@ type ItemNullable = { [k in keyof Item]: Item[k] | null }
 type ItemNullableWithStringPrice = Pick<ItemNullable, 'link' | 'title'> & { price: string | null }
 
 const isNotNull = (i: Item | ItemNullable): i is Item => i.link !== null && i.title !== null && i.price !== null
+
+const matchesName = (title: string, mustContain: string[]) =>
+  mustContain.map(m => m.toLowerCase()).some(m => title.toLowerCase().indexOf(m) !== -1)
 
 const processQuery = (browser: puppeteer.Browser) => async (
   product: typeof config.productQueries[0]
@@ -47,8 +50,9 @@ const processQuery = (browser: puppeteer.Browser) => async (
       sku: link ? extractProductSkuFromUrl(link) : ''
     }))
     .filter(isNotNull)
+    .filter(x => product.skuNameMatch === undefined || matchesName(x.title, product.skuNameMatch))
     .filter(x => x.sku.length > 0)
-    .filter(x => x.price < product.price.below && x.price > product.price.above)
+    .filter(x => isPriceInRange(x.price, product.price))
 }
 
 /**
