@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer'
 import { from, timer } from 'rxjs'
-import { catchError, concatMap, delay, filter, finalize, map, mergeMap, reduce, take, tap } from 'rxjs/Operators'
+import { catchError, concatMap, delay, filter, finalize, map, mergeMap, reduce, tap } from 'rxjs/Operators'
 import config from './config/config'
 import log from './logging/log'
 import { flagAsSent, hasBeenSent, storageCount } from './persistance/storage'
@@ -62,7 +62,9 @@ timer(0, config.crawler.interval)
         .pipe(
           tap(items => log.success(`Grouping matches and firing email w/ ${items.length} product(s)`, '1')),
           map(items => items.sort((a, b) => a.price - b.price)), // sort price asc
-          mergeMap(items => from(sendItems(items)).pipe(tap(() => items.forEach(item => flagAsSent(item.sku))))),
+          mergeMap(items =>
+            from(sendItems(items)).pipe(tap(() => items.forEach(item => flagAsSent(item.sku, item.price))))
+          ),
           finalize(() => {
             log.debug('Finished crawling, terminating browser', '1')
             return browser.close()
