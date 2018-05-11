@@ -16,7 +16,6 @@ timer(0, config.crawler.interval)
   .pipe(
     tap(i => log.info(`Run ${i}: Instantiating new browser`)),
     concatMap(() => puppeteer.launch(config.puppeteer)),
-    take(1),
     mergeMap(browser =>
       from(config.productQueries)
         // process chain of queries
