@@ -27,7 +27,7 @@ const config = {
     from: process.env.EMAIL_FROM,
     to: process.env.EMAIL_TO,
     smtpConfig: {
-      host: 'smtp.gmail.com',
+      host: process.env.EMAIL_HOST || 'smtp.gmail.com',
       port: 587,
       secure: false, // upgrade later with STARTTLS
       auth: {
