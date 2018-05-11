@@ -103,6 +103,28 @@ const productQueries: Query[] = [
     },
     skuNameMatch: ['KD55XE7', 'KD55XD8'],
     renotifyOnLowerPrice: true
+  },
+  {
+    label: 'Xbox One X Germany',
+    query:
+      'https://www.amazon.de/s/ref=sr_nr_n_0?fst=as%3Aoff&rh=n%3A3581963031%2Cn%3A300992%2Cn%3A%21541708%2Cn%3A2785606031%2Ck%3Axbox+one+x%2Cn%3A2785608031&bbn=3581963031&keywords=xbox+one+x&ie=UTF8&qid=1526070030&rnid=3581963031',
+    price: {
+      below: 350,
+      above: 200
+    },
+    skuNameMatch: ['Xbox One X'],
+    renotifyOnLowerPrice: true
+  },
+  {
+    label: 'Xbox One X Italy',
+    query:
+      'https://www.amazon.it/s/ref=sr_nr_scat_2785640031_ln?rh=n%3A2785640031%2Ck%3Axbox+one+x&bbn=3581999031&keywords=xbox+one+x&ie=UTF8&qid=1526070159&scn=2785640031&h=d8f50b80ca97cff34416a84aa92830bc2a1a4c04',
+    price: {
+      below: 340,
+      above: 200
+    },
+    skuNameMatch: ['Xbox One X'],
+    renotifyOnLowerPrice: true
   }
 ]
 
