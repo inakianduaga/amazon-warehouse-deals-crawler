@@ -18,6 +18,10 @@ type Query = {
      */
     above?: number
   }
+  /**
+   * If enabled, notifications will be re-sent if the new price is lower than the last notification's
+   */
+  renotifyOnLowerPrice?: boolean
 }
 
 export type Price = Query['price']
@@ -31,7 +35,8 @@ const productQueries: Query[] = [
     price: {
       below: 1250,
       above: 950
-    }
+    },
+    renotifyOnLowerPrice: true
   },
   {
     label: 'amazon uk oleds',
@@ -40,7 +45,8 @@ const productQueries: Query[] = [
     price: {
       below: 1250,
       above: 950
-    }
+    },
+    renotifyOnLowerPrice: true
   },
   // Leds
   {
@@ -51,7 +57,8 @@ const productQueries: Query[] = [
       below: 650,
       above: 500
     },
-    skuNameMatch: ['Samsung MU7009', 'Samsung MU8009', 'Samsung MU9009']
+    skuNameMatch: ['Samsung MU7009', 'Samsung MU8009', 'Samsung MU9009'],
+    renotifyOnLowerPrice: true
   },
   {
     label: 'lg 55 SJ series de',
@@ -61,7 +68,8 @@ const productQueries: Query[] = [
       below: 625,
       above: 500
     },
-    skuNameMatch: ['LG 55SJ']
+    skuNameMatch: ['LG 55SJ'],
+    renotifyOnLowerPrice: true
   },
   {
     label: 'lg 55 SJ series uk',
@@ -71,7 +79,8 @@ const productQueries: Query[] = [
       below: 625,
       above: 500
     },
-    skuNameMatch: ['LG 55SJ']
+    skuNameMatch: ['LG 55SJ'],
+    renotifyOnLowerPrice: true
   },
   {
     label: 'Sony 55XE70 de',
@@ -81,7 +90,8 @@ const productQueries: Query[] = [
       below: 485,
       above: 400
     },
-    skuNameMatch: ['KD55XE7', 'KD55XD8']
+    skuNameMatch: ['KD55XE7', 'KD55XD8'],
+    renotifyOnLowerPrice: true
   },
   {
     label: 'Sony 55XE70 uk',
@@ -91,7 +101,8 @@ const productQueries: Query[] = [
       below: 485,
       above: 400
     },
-    skuNameMatch: ['KD55XE7', 'KD55XD8']
+    skuNameMatch: ['KD55XE7', 'KD55XD8'],
+    renotifyOnLowerPrice: true
   }
 ]
 

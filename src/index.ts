@@ -31,7 +31,9 @@ timer(0, config.crawler.interval)
             from(processQuery(data.browser)(data.query))
               // Process all summary products matching query
               .pipe(
-                map(products => products.filter(p => !hasBeenSent(p.sku))), // skip already sent
+                map(products =>
+                  products.filter(p => !hasBeenSent(p.sku, data.query.renotifyOnLowerPrice ? p.price : undefined))
+                ), // skip already sent
                 tap(products => log.debug(`"${data.query.label}": identified ${products.length} new product(s)`, '2')),
                 mergeMap(products => from(products)),
                 mergeMap(product =>
